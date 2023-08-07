@@ -91,12 +91,19 @@ def crosscheck_login():
     password = request.form['password']
     
     exists = collection.find_one({'email':email,'password': password})
-    if exists:
-
-            return '<h4>Successful Authentication!</p><a href="user_home"><button>Continue</button></h4>'
+    if exists:  
+        trait = exists.get('trait', 'default_trait_value')
+        if trait == "User":
+            return '<h4>Successful Authentication! You are an User</p><a href="user_home"><button>Continue</button></h4>'
+        if trait == "Admin":
+            return '<h4>Successful Authentication! You are an Admin</p><a href="admin_home"><button>Continue</button></h4>'
     else:
             return "<h4>Authentication Failed<h4>!"
         
 @app.route('/user_home', methods=['GET', 'POST'])
 def user_page():
     return render_template('./user_home.html')
+
+@app.route('/admin_home', methods=['GET', 'POST'])
+def admin_page():
+    return render_template('./admin_home.html')
