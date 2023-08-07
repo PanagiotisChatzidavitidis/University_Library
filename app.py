@@ -34,7 +34,6 @@ x=''
 
 def connect_to_db():
     try:
-        #print(pymongo.__version__)
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
         return db
@@ -44,7 +43,7 @@ def connect_to_db():
 
 @app.route('/home')
 def home():
-    # Render the home page template
+    # Render the home
     return render_template('./home.html')
 
 @app.route('/sign_up', methods=['GET', 'POST'])
@@ -53,21 +52,20 @@ def register_form():
 
 @app.route('/sign_up2', methods=['GET', 'POST'])
 def registerpage():
-    # Get user inputs from the request form data
+    # Gather inputs
     name = request.form.get('name')
     surname= request.form.get('surname')
     email = request.form.get('email')
     password = request.form.get('password')
     birthday = request.form.get('birthday')
 
-
-    # Connect to MongoDB
+    #MongoDB Connection
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
         collection = db['users']
-
-        # Create a new user document
+        
+        # User Creation
         user = {
             'name': name,
             'surname': surname,
@@ -81,9 +79,11 @@ def registerpage():
         result = collection.insert_one(user)
 
         if result.inserted_id:
-            return '<h4> Your account has been created successfully!</p><a href="login_form"><button>Login</button></h4>'
+            return '<h4> Your account has been created successfully!</p><a href="sign_in"><button>Login</button></h4>'
         else:
             return 'Failed to create user'
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
+    
+
     
