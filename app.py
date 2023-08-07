@@ -1,16 +1,3 @@
-''' 
-
-Τρεψω την εντολη
-.venv\Scripts\activate
-και την
-set FLASK_APP=app
-
-Για να την τρεξω
-flask run
-
-
-'''
-
 
 
 from flask import Flask, render_template, request, make_response
@@ -30,7 +17,7 @@ MONGO_HOST = 'localhost'  # Update with your MongoDB host
 MONGO_PORT = 27017  # Update with your MongoDB port
 MONGO_DB = 'Library'  # Update with your MongoDB database name
 
-x=''
+connected='no one is connected'
 
 def connect_to_db():
     try:
@@ -91,7 +78,7 @@ def login_form():
     
 @app.route('/sign_in2', methods=['GET','POST'])
 def crosscheck_login():
-    global x
+    global connected
     #MongoDB Connection
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -105,6 +92,11 @@ def crosscheck_login():
     
     exists = collection.find_one({'email':email,'password': password})
     if exists:
-            return "Successfull Authentication!"
+
+            return '<h4>Successful Authentication!</p><a href="user_home"><button>Continue</button></h4>'
     else:
-            return "Authentication Failed!"
+            return "<h4>Authentication Failed<h4>!"
+        
+@app.route('/user_home', methods=['GET', 'POST'])
+def user_page():
+    return render_template('./user_home.html')
