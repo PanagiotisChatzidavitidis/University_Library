@@ -85,5 +85,26 @@ def registerpage():
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
     
-
+@app.route('/sign_in', methods=['GET', 'POST'])
+def login_form():
+    return render_template('./sign_in.html')
     
+@app.route('/sign_in2', methods=['GET','POST'])
+def crosscheck_login():
+    global x
+    #MongoDB Connection
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['users']
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
+    
+    email = request.form['email']
+    password = request.form['password']
+    
+    exists = collection.find_one({'email':email,'password': password})
+    if exists:
+            return "Successfull Authentication!"
+    else:
+            return "Authentication Failed!"
