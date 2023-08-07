@@ -47,9 +47,9 @@ def home():
     # Render the home page template
     return render_template('./home.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/sign_up', methods=['GET', 'POST'])
 def register_form():
-    return render_template('./register.html')
+    return render_template('./sign_up.html')
 
 @app.route('/register_complete', methods=['GET', 'POST'])
 def registerpage():
