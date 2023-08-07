@@ -15,7 +15,7 @@ def hello():
 MONGO_HOST = 'localhost'  # Update with your MongoDB host
 #MONGO_HOST = 'db'
 MONGO_PORT = 27017  # Update with your MongoDB port
-MONGO_DB = 'Library'  # Update with your MongoDB database name
+MONGO_DB = 'UnipiLibrary'  # Update with your MongoDB database name
 
 connected='no one is connected'
 
