@@ -1,15 +1,12 @@
 
 
-from flask import Flask, render_template, request, make_response
+from flask import Flask, render_template, request, make_response, session
 #from dbconfig import get_mongo_connection
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 app = Flask(__name__)
-
-@app.route('/', methods=['GET', "POST"])
-def hello():
-    return render_template('./home.html')
+app.secret_key = "secret"
 
 # MongoDB connection settings
 MONGO_HOST = 'localhost'  # Update with your MongoDB host
@@ -17,7 +14,10 @@ MONGO_HOST = 'localhost'  # Update with your MongoDB host
 MONGO_PORT = 27017  # Update with your MongoDB port
 MONGO_DB = 'UnipiLibrary'  # Update with your MongoDB database name
 
-connected='no one is connected'
+
+@app.route('/', methods=['GET', "POST"])
+def hello():
+    return render_template('./home.html')
 
 def connect_to_db():
     try:
@@ -66,7 +66,7 @@ def registerpage():
         result = collection.insert_one(user)
 
         if result.inserted_id:
-            return '<h4> Your account has been created successfully!</p><a href="sign_in"><button>Login</button></h4>'
+            return '<h4> Your account has been created successfully!</p><a href="home"><button>return</button></h4>'
         else:
             return 'Failed to create user'
     except Exception as e:
@@ -78,7 +78,6 @@ def login_form():
     
 @app.route('/sign_in2', methods=['GET','POST'])
 def crosscheck_login():
-    global connected
     #MongoDB Connection
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -93,6 +92,8 @@ def crosscheck_login():
     exists = collection.find_one({'email':email,'password': password})
     if exists:  
         trait = exists.get('trait', 'default_trait_value')
+        session["exists"] = True
+        session["email"] = email  # Store the email in the session
         if trait == "User":
             return '<h4>Successful Authentication! You are an User</p><a href="user_home"><button>Continue</button></h4>'
         if trait == "Admin":
@@ -100,10 +101,20 @@ def crosscheck_login():
     else:
             return "<h4>Authentication Failed<h4>!"
         
+#@app.route('/user_home', methods=['GET', 'POST'])
+#def user_page():
+#    return render_template('./user_home.html')
+
 @app.route('/user_home', methods=['GET', 'POST'])
 def user_page():
-    return render_template('./user_home.html')
+    if "email" in session:
+        user_email = session["email"]
+        return f"Welcome, {user_email}! This is your user home page."
+    else:
+        return "User not authenticated."
+
 
 @app.route('/admin_home', methods=['GET', 'POST'])
 def admin_page():
     return render_template('./admin_home.html')
+
