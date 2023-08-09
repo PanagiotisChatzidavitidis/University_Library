@@ -77,7 +77,7 @@ def login_form():
     return render_template('./sign_in.html')
     
 @app.route('/sign_in2', methods=['GET','POST'])
-def crosscheck_login():
+def authentication():
     #MongoDB Connection
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -99,22 +99,58 @@ def crosscheck_login():
         if trait == "Admin":
             return '<h4>Successful Authentication! You are an Admin</p><a href="admin_home"><button>Continue</button></h4>'
     else:
-            return "<h4>Authentication Failed<h4>!"
+            return '<h4>Authentication Failed!</p></p><a href="sign_in"><button>Try Again</button><a href="home"><button>Return</button></h4>'
         
-#@app.route('/user_home', methods=['GET', 'POST'])
-#def user_page():
-#    return render_template('./user_home.html')
 
+#render user page template and make sesssion 
 @app.route('/user_home', methods=['GET', 'POST'])
 def user_page():
     if "email" in session:
         user_email = session["email"]
-        return f"Welcome, {user_email}! This is your user home page."
+        return render_template('./user_home.html', user_email=user_email)  # Pass user_email to the template
     else:
         return "User not authenticated."
 
 
+#render admin page template
 @app.route('/admin_home', methods=['GET', 'POST'])
 def admin_page():
     return render_template('./admin_home.html')
 
+
+
+
+@app.route('/book_insert', methods=['POST'])
+def flight_creation():
+    # Get user inputs
+    title = request.form.get('title')
+    author = request.form.get('author')
+    ISBN = request.form.get('ISBN')
+    descreption = request.form.get('descreption')
+    num_pages = request.form.get('num_pages')
+    due_date = request.form.get('due_date')
+
+    # Connect to MongoDB
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['flights']
+
+        # Create a new book
+        flight = {
+            'title': title,
+            'author': author,
+            'ISBN': ISBN,
+            'descreption': descreption,
+            'num_pages': num_pages,
+            'due_date':due_date   
+        }
+
+        # Insert the book into the 'books' collection
+        result = collection.insert_one(book)
+        if result.inserted_id:
+            return render_template('./admin_page.html')        
+        else:
+            return 'Failed to create user'
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
