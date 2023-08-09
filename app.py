@@ -119,38 +119,48 @@ def admin_page():
 
 
 
+@app.route('/book_insert_route', methods=['GET', 'POST'])
+def admin_page_book():
+    return render_template('./book_insert.html')
 
-@app.route('/book_insert', methods=['POST'])
-def flight_creation():
+
+
+@app.route('/insert_book', methods=['POST'])
+def create_book():
     # Get user inputs
     title = request.form.get('title')
     author = request.form.get('author')
     ISBN = request.form.get('ISBN')
-    descreption = request.form.get('descreption')
+    description = request.form.get('description')
     num_pages = request.form.get('num_pages')
     due_date = request.form.get('due_date')
 
-    # Connect to MongoDB
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
-        collection = db['flights']
+        collection = db['books']
 
+        # Check if a book with the same ISBN already exists
+        existing_book = collection.find_one({'ISBN': ISBN})
+        if existing_book:
+            return '<h4>A book with the same ISBN already exists<a href="book_insert_route"></p><button>Try Again</button></h4>'
+        
         # Create a new book
-        flight = {
+        book = {
             'title': title,
             'author': author,
             'ISBN': ISBN,
-            'descreption': descreption,
+            'description': description,
             'num_pages': num_pages,
-            'due_date':due_date   
+            'due_date': due_date   
         }
-
-        # Insert the book into the 'books' collection
+        
+        # Insert the book document into the 'books' collection
         result = collection.insert_one(book)
+
         if result.inserted_id:
-            return render_template('./admin_page.html')        
+            return render_template('./admin_home.html')        
         else:
-            return 'Failed to create user'
+            return 'Failed to create book'
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
