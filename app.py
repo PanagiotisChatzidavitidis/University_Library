@@ -165,14 +165,16 @@ def create_book():
             'ISBN': ISBN,
             'description': description,
             'num_pages': num_pages,
-            'due_date': due_date   
+            'due_date': due_date,
+            'status' :  'Available'
         }
         
         # Insert the book document into the 'books' collection
         result = collection.insert_one(book)
 
         if result.inserted_id:
-            return render_template('./admin_home.html')        
+            success_message = f"Book '{title}' has been added successfully!"
+            return f'<h4>{success_message}<a href="admin_home"></p><button>Return</button></h4>'        
         else:
             return 'Failed to create book'
     except Exception as e:
