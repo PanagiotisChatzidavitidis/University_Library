@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, make_response, session
 #from dbconfig import get_mongo_connection
 from pymongo import MongoClient
 from bson.objectid import ObjectId
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "secret"
@@ -179,3 +180,50 @@ def create_book():
             return 'Failed to create book'
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
+
+#Display books
+@app.route('/book_display')
+def display_books():
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['books']
+
+        books = collection.find({})  # Fetch all books from the collection
+
+        return render_template('./book_display.html', books=books)
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
+    
+@app.route('/view_book/<isbn>')
+def view_book(isbn):
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['books']
+
+        book = collection.find_one({'ISBN': isbn})  # Fetch the selected book
+
+        return render_template('./view_book.html', book=book)
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
+
+#render view books
+@app.route('/book_display', methods=['GET', 'POST'])
+def book_display():
+    return render_template('./book_display.html')
+
+#selecting book
+@app.route('/book_booking/<isbn>', methods=['GET'])
+def book_booking(isbn):
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['books']
+
+        book = collection.find_one({'ISBN': isbn})  # Fetch the selected book
+
+        return render_template('./book_booking.html', book=book)
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
+

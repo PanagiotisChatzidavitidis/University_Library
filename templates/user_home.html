@@ -8,8 +8,13 @@
     <h2>User Page</h2>
         <!-- Welcome message calling the user by email part before @ -->
     <h4>Welcome, {{ session['email'].split('@')[0] }}! This is your user home page.</h4> 
-    
-    <h2>Available Books</h2> 
+    <div>
+        <a href="book_display"><button>Display Books</button></a>
+        <a href="book_booking"><button>Book a book</button></a>
+
+
+
+    </div>
 
 </body>
 </html>
