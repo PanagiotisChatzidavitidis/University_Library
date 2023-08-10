@@ -41,16 +41,20 @@ def register_form():
 def registerpage():
     # Gather inputs
     name = request.form.get('name')
-    surname= request.form.get('surname')
+    surname = request.form.get('surname')
     email = request.form.get('email')
     password = request.form.get('password')
     birthday = request.form.get('birthday')
 
-    #MongoDB Connection
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
         collection = db['users']
+
+        # Check if a user with the same email already exists
+        existing_user = collection.find_one({'email': email})
+        if existing_user:
+            return 'A user with the same email already exists.</p><a href="sign_up"><button>Try Again</button><a href="sign_in"><button>sign-in</button></h4>'
         
         # User Creation
         user = {
@@ -71,6 +75,7 @@ def registerpage():
             return 'Failed to create user'
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
+
     
 @app.route('/sign_in', methods=['GET', 'POST'])
 def login_form():
@@ -101,15 +106,23 @@ def authentication():
     else:
             return '<h4>Authentication Failed!</p></p><a href="sign_in"><button>Try Again</button><a href="home"><button>Return</button></h4>'
         
+#end the session and send user to home page
+@app.route('/sign_out', methods=['GET'])
+def sign_out():
+    # Clear the session and redirect to the home page
+    session.clear()
+    return render_template('/home.html')
+
 
 #render user page template and make sesssion 
 @app.route('/user_home', methods=['GET', 'POST'])
 def user_page():
     if "email" in session:
         user_email = session["email"]
-        return render_template('./user_home.html', user_email=user_email)  # Pass user_email to the template
+        return render_template('./user_home.html', user_email=user_email, session=session)
     else:
         return "User not authenticated."
+
 
 
 #render admin page template

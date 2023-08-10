@@ -1,1 +1,14 @@
-<h1>Welcome, {{ user_email }}! This is your user home page.</h1>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Home Page</title>
+</head>
+<body>
+    <a href="sign_out" style="float: right;"><button>Sign Out</button></a>
+    <h2>User Page</h2>
+        <!-- Welcome message calling the user by email part before @ -->
+    <h4>Welcome, {{ session['email'].split('@')[0] }}! This is your user home page.</h4> 
+
+</body>
+</html>
+
