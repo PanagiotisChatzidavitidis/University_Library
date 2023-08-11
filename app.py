@@ -144,6 +144,7 @@ def create_book():
     # Get user inputs
     title = request.form.get('title')
     author = request.form.get('author')
+    release_date = request.form.get('release_date')
     ISBN = request.form.get('ISBN')
     description = request.form.get('description')
     num_pages = request.form.get('num_pages')
@@ -163,6 +164,7 @@ def create_book():
         book = {
             'title': title,
             'author': author,
+            'release_date': release_date,
             'ISBN': ISBN,
             'description': description,
             'num_pages': num_pages,
@@ -213,17 +215,30 @@ def view_book(isbn):
 def book_display():
     return render_template('./book_display.html')
 
-#selecting book
-@app.route('/book_booking/<isbn>', methods=['GET'])
-def book_booking(isbn):
+#render search page
+@app.route('/search')
+def search_form():
+    return render_template('./search.html')
+#render search bar funtionality
+@app.route('/search_results', methods=['GET'])
+def search_results():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
         collection = db['books']
 
-        book = collection.find_one({'ISBN': isbn})  # Fetch the selected book
+        search_query = request.args.get('search_query')
 
-        return render_template('./book_booking.html', book=book)
+        # Search for books by title, author, ISBN, and availability
+        books = collection.find({
+            '$or': [
+                {'title': {'$regex': search_query, '$options': 'i'}},
+                {'author': {'$regex': search_query, '$options': 'i'}},
+                {'ISBN': {'$regex': search_query, '$options': 'i'}},
+                {'status': {'$regex': search_query, '$options': 'i'}}
+            ]
+        })
+
+        return render_template('./search.html', books=books)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
-
