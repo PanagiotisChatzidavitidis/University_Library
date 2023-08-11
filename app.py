@@ -242,3 +242,78 @@ def search_results():
         return render_template('./search.html', books=books)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
+    
+    
+    # Display book selection
+@app.route('/book_selection')
+def book_selection():
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['books']
+
+        books = collection.find({})  # Fetch all books from the collection
+
+        return render_template('./book_selection.html', books=books)
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
+
+
+# Rent Book
+@app.route('/rent_book/<isbn>', methods=['GET'])
+def rent_book(isbn):
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['books']
+
+        book = collection.find_one({'ISBN': isbn})
+        if not book:
+            return 'Book not found'
+
+        return render_template('./rent_book.html', book=book)
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
+
+# Confirm Rent
+@app.route('/confirm_rent/<isbn>', methods=['POST'])
+def confirm_rent(isbn):
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        books_collection = db['books']
+        rents_collection = db['rents']
+
+        book = books_collection.find_one({'ISBN': isbn})
+        if not book:
+            return 'Book not found'
+
+        contact_phone = request.form.get('contact_phone')
+
+        if book['status'] == 'Available':
+            user_email = session['email']
+            user = db['users'].find_one({'email': user_email})
+
+            if user:
+                user_name = user['name']
+                user_surname = user['surname']
+
+                rental_record = {
+                    'user_email': user_email,
+                    'user_name': user_name,
+                    'user_surname': user_surname,
+                    'book_ISBN': isbn,
+                    'rent_date': datetime.now(),
+                    'contact_phone': contact_phone
+                }
+
+                rents_collection.insert_one(rental_record)
+                books_collection.update_one({'ISBN': isbn}, {'$set': {'status': 'Unavailable'}})
+
+                return render_template('rent_result.html', result_message='Book successfully rented!')
+            else:
+                return render_template('rent_result.html', result_message='User not found')
+        else:
+            return render_template('rent_result.html', result_message='Book is not available for rent')
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"

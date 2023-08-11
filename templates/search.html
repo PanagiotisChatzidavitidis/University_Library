@@ -4,7 +4,7 @@
     <title>Search Books</title>
 </head>
 <body>
-    <a href="home" style="float: right;"><button>Return</button></a>
+    <a href="user_home" style="float: right;"><button>Return</button></a>
     <h1>Search Books</h1>
 
     <form action="/search_results" method="GET">
@@ -22,6 +22,7 @@
                 <strong>Title:</strong> <a href="{{ url_for('view_book', isbn=book.ISBN) }}">{{ book.title }}</a><br>
                 <strong>Author:</strong> {{ book.author }}<br>
                 <strong>Status:</strong> {{ book.status }}
+                
             </li>
             <br>
         {% endfor %}
