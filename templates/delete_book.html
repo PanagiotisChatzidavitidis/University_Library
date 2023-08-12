@@ -4,12 +4,18 @@
     <title>Delete Book</title>
 </head>
 <body>
-    <a href="admin_home" style="float: right;"><button>Return</button></a>
     <h1>Delete Book</h1>
-    <form method="POST">
-        <label for="isbn">Enter ISBN of the book to delete:</label>
-        <input type="text" id="isbn" name="isbn" required>
-        <button type="submit">Delete Book</button>
+    <form method="POST" action="/delete_book">
+        <label for="isbn">Select an available book to delete:</label>
+        <select name="isbn">
+            {% for book in available_books %}
+                <option value="{{ book.ISBN }}">{{ book.title }} (ISBN: {{ book.ISBN }})</option>
+            {% endfor %}
+        </select>
+        <br><br>
+        <input type="submit" value="Delete Book">
     </form>
+    <br>
+    <a href="admin_home"><button>Return</button></a>
 </body>
 </html>

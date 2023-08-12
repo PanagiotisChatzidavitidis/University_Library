@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Display Books</title>
+</head>
+<body>
+    <h1>Admin Display Books</h1>
+    <table border="1">
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Release Date</th>
+            <th>ISBN</th>
+            <th>Description</th>
+            <th>Number of Pages</th>
+            <th>Rent days</th>
+            <th>Status</th>
+            <th>Rent Details</th>
+        </tr>
+        {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.author }}</td>
+                <td>{{ book.release_date }}</td>
+                <td>{{ book.ISBN }}</td>
+                <td>{{ book.description }}</td>
+                <td>{{ book.num_pages }}</td>
+                <td>{{ book.due_date }}</td>
+                <td>{{ book.status }}</td>
+                <td>
+                    {% if book.status == 'Unavailable' %}
+                        User: {{ book.rent_details.user_name }} {{ book.rent_details.user_surname }}<br>
+                        Email: {{ book.rent_details.user_email }}<br>
+                        Rent Date: {{ book.rent_details.rent_date.strftime('%Y-%m-%d') }}<br>
+                        Return Date: {{ book.rent_details.return_date.strftime('%Y-%m-%d') }}<br>
+                        Contact Phone: {{ book.rent_details.contact_phone }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <a href="/admin_home"><button>Return</button></a>
+</body>
+</html>

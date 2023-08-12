@@ -7,15 +7,27 @@
     <a href="user_home" style="float: right;"><button>Return</button></a>
     <h1>Book Selection</h1>
     
-    <ul>
+    <table border="1">
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
         {% for book in books %}
-        <li>
-            {{ book.title }} by {{ book.author }} (ISBN: {{ book.ISBN }})
-            {% if book.status == 'Available' %}
-                <a href="/rent_book/{{ book.ISBN }}"><button>Rent</button></a>
-            {% endif %}
-        </li>
+        <tr>
+            <td>{{ book.title }}</td>
+            <td>{{ book.author }}</td>
+            <td>{{ book.ISBN }}</td>
+            <td>{{ book.status }}</td>
+            <td>
+                {% if book.status == 'Available' %}
+                    <a href="/rent_book/{{ book.ISBN }}"><button>Rent</button></a>
+                {% endif %}
+            </td>
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
 </body>
 </html>

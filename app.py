@@ -402,4 +402,88 @@ def delete_book():
         except Exception as e:
             return f"Error connecting to MongoDB: {str(e)}"
     else:
-        return render_template('delete_book.html')
+        try:
+            client = MongoClient(MONGO_HOST, MONGO_PORT)
+            db = client[MONGO_DB]
+            collection = db['books']
+
+            # Fetch available books from the collection
+            available_books = collection.find({'status': 'Available'})
+
+            return render_template('delete_book.html', available_books=available_books)
+        except Exception as e:
+            return f"Error connecting to MongoDB: {str(e)}"
+
+
+# Update Due Date with Dropdown
+@app.route('/update_due_date', methods=['GET', 'POST'])
+def update_due_date():
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['books']
+
+        available_books = collection.find({'status': 'Available'})  # Fetch available books from the collection
+
+        if request.method == 'POST':
+            isbn = request.form.get('isbn')
+            new_due_date = int(request.form.get('due_date'))
+            
+            book = collection.find_one({'ISBN': isbn})
+            if not book:
+                return 'Book not found'
+
+            # Update the due_date of the book
+            result = collection.update_one({'ISBN': isbn}, {'$set': {'due_date': new_due_date}})
+            if result.modified_count > 0:
+                return 'Rent days updated successfully</p><a href="update_due_date"><button>Update Another Book</button><a href="admin_home"><button>Return</button>'
+            else:
+                return 'Failed to update rent days</p><a href="update_due_date"><button>Update Another Book</button><a href="admin_home"><button>Return</button>'
+
+        return render_template('update_due_date.html', available_books=available_books)
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
+
+#display books for admin
+@app.route('/admin_display_books')
+def admin_display_books():
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        collection = db['books']
+        rents_collection = db['rents']
+
+        books = collection.find({})  # Fetch all books from the collection
+
+        book_data = []
+
+        for book in books:
+            book_entry = {
+                'title': book['title'],
+                'author': book['author'],
+                'release_date': book['release_date'],
+                'ISBN': book['ISBN'],
+                'description': book['description'],
+                'num_pages': book['num_pages'],
+                'due_date': book['due_date'],
+                'status': book['status']
+            }
+
+            if book['status'] == 'Unavailable': # if somebody has rented this book fetch their rent details
+                rent = rents_collection.find_one({'book_ISBN': book['ISBN']})
+                if rent:
+                    rent_details = {
+                        'user_name': rent['user_name'],
+                        'user_surname': rent['user_surname'],
+                        'user_email': rent['user_email'],
+                        'rent_date': rent['rent_date'],
+                        'return_date': rent['return_date'],
+                        'contact_phone': rent['contact_phone']
+                    }
+                    book_entry['rent_details'] = rent_details
+
+            book_data.append(book_entry)
+
+        return render_template('admin_display_books.html', books=book_data)
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
