@@ -10,7 +10,9 @@
         {% for book in books %}
         <li>
             {{ book.title }} by {{ book.author }} (ISBN: {{ book.ISBN }})
-            <a href="/rent_book/{{ book.ISBN }}"><button>Rent</button></a>
+            {% if book.status == 'Available' %}
+                <a href="/rent_book/{{ book.ISBN }}"><button>Rent</button></a>
+            {% endif %}
         </li>
         {% endfor %}
     </ul>

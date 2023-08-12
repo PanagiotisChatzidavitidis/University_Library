@@ -317,3 +317,19 @@ def confirm_rent(isbn):
             return render_template('rent_result.html', result_message='Book is not available for rent')
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
+
+
+# Display User Rents
+@app.route('/user_rents')
+def user_rents():
+    try:
+        client = MongoClient(MONGO_HOST, MONGO_PORT)
+        db = client[MONGO_DB]
+        rents_collection = db['rents']
+
+        user_email = session['email']
+        user_rents = rents_collection.find({'user_email': user_email})
+
+        return render_template('user_rents.html', user_rents=user_rents)
+    except Exception as e:
+        return f"Error connecting to MongoDB: {str(e)}"
