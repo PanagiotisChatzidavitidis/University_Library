@@ -9,11 +9,13 @@
         <tr>
             <th>ISBN</th>
             <th>Rent Date</th>
+            <th>Return Date</th>
         </tr>
         {% for rent in user_rents %}
         <tr>
             <td><a href="{{ url_for('view_book', isbn=rent.book_ISBN) }}">{{ rent.book_ISBN }}</a></td>
             <td>{{ rent.rent_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ rent.return_date.strftime('%Y-%m-%d') }}</td>
         </tr>
         {% endfor %}
     </table>

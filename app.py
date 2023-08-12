@@ -6,6 +6,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 
+
 app = Flask(__name__)
 app.secret_key = "secret"
 
@@ -275,6 +276,8 @@ def rent_book(isbn):
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
 
+
+
 # Confirm Rent
 @app.route('/confirm_rent/<isbn>', methods=['POST'])
 def confirm_rent(isbn):
@@ -298,12 +301,19 @@ def confirm_rent(isbn):
                 user_name = user['name']
                 user_surname = user['surname']
 
+                due_date = int(book['due_date'])  # Replace 'due_date' with the actual field name
+
+                # Calculate return date based on rent date and due date
+                rent_date = datetime.now()
+                return_date = rent_date + timedelta(days=due_date)
+
                 rental_record = {
                     'user_email': user_email,
                     'user_name': user_name,
                     'user_surname': user_surname,
                     'book_ISBN': isbn,
-                    'rent_date': datetime.now(),
+                    'rent_date': rent_date,
+                    'return_date': return_date,  # Store the calculated return date
                     'contact_phone': contact_phone
                 }
 
@@ -317,6 +327,8 @@ def confirm_rent(isbn):
             return render_template('rent_result.html', result_message='Book is not available for rent')
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
+
+
 
 
 # Display User Rents
@@ -333,3 +345,61 @@ def user_rents():
         return render_template('user_rents.html', user_rents=user_rents)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
+    
+
+# Delete User Account
+@app.route('/delete_account', methods=['GET', 'POST'])
+def delete_account():
+    if "email" in session:
+        if request.method == 'POST':
+            try:
+                client = MongoClient(MONGO_HOST, MONGO_PORT)
+                db = client[MONGO_DB]
+                users_collection = db['users']
+
+                user_email = session['email']
+
+                # Delete user account
+                result = users_collection.delete_one({'email': user_email})
+
+                if result.deleted_count > 0:
+                    # Clear session and redirect to the home page after successful deletion
+                    session.clear()
+                    return render_template('delete_account.html', message='Your account has been deleted.')
+                else:
+                    return render_template('delete_account.html', message='Failed to delete your account.')
+            except Exception as e:
+                return f"Error connecting to MongoDB: {str(e)}"
+        else:
+            return render_template('delete_account_confirmation.html')
+    else:
+        return "User not authenticated."
+
+
+@app.route('/delete_book', methods=['GET', 'POST'])
+def delete_book():
+    if request.method == 'POST':
+        isbn = request.form.get('isbn')
+
+        try:
+            client = MongoClient(MONGO_HOST, MONGO_PORT)
+            db = client[MONGO_DB]
+            collection = db['books']
+
+            book = collection.find_one({'ISBN': isbn})
+            if not book:
+                return 'Book not found</p><a href="delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
+
+            if book['status'] == 'Unavailable':
+                return 'Book has not been returned yet. Try again later.</p><a href="delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
+
+            # Delete the book from the collection
+            result = collection.delete_one({'ISBN': isbn})
+            if result.deleted_count > 0:
+                return 'Book deleted successfully</p><a href="delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
+            else:
+                return 'Failed to delete book'
+        except Exception as e:
+            return f"Error connecting to MongoDB: {str(e)}"
+    else:
+        return render_template('delete_book.html')
