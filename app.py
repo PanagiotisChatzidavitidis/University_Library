@@ -10,8 +10,6 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "secret"
 
-
-
 # MongoDB connection settings
 MONGO_HOST = 'localhost'  # Update with your MongoDB host
 #MONGO_HOST = 'db'
@@ -115,7 +113,7 @@ def authentication():
 def sign_out():
     # Clear the session and redirect to the home page
     session.clear()
-    return render_template('/home')
+    return render_template('./home.html')
 
 
 #render user page template and make sesssion 
