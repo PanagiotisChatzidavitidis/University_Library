@@ -9,11 +9,12 @@
         <!-- Welcome message calling the user by email part before @ -->
     <h4>Welcome, {{ session['email'].split('@')[0] }}! This is your user home page.</h4> 
     <div>
-        <a href="book_display"><button>Display Books</button></a>
-        <a href="search"><button>Search Books</button></a>
-        <a href="book_selection"><button>Rent a book</button></a>
+        <a href="user_book_display"><button>Display Books</button></a>
+        <a href="user_search"><button>Search Books</button></a>
+        <a href="user_book_selection"><button>Rent a book</button></a>
         <a href="user_rents"><button>Your rents</button></a>
-        <a href="delete_account"><button>Delete your Account</button></a>        
+        <a href="user_return_books"><button>Return books</button></a>
+        <a href="user_delete_account"><button>Delete your Account</button></a>        
 
 
     </div>

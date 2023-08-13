@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Rent Book</title>
+    <script>
+        function validatePhoneNumber() {
+            var phoneNumber = document.getElementById('contact_phone').value;
+            var phoneNumberPattern = /^\d{10}$/; // Regular expression for 10 digits
+
+            if (!phoneNumberPattern.test(phoneNumber)) {
+                alert('Please enter a valid 10-digit phone number.');
+                return false;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Rent Book</h1>
+    <p>{{ book.title }} by {{ book.author }} (ISBN: {{ book.ISBN }})</p>
+    
+    <form action="/user_confirm_rent/{{ book.ISBN }}" method="POST" onsubmit="return validatePhoneNumber();">
+        <label for="contact_phone">Contact Phone:</label>
+        <input type="text" id="contact_phone" name="contact_phone" required><br>
+        
+        <input type="submit" value="Confirm Rent">
+    </form>
+</body>
+</html>

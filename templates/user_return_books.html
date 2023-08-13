@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Return Books</title>
+</head>
+<body>
+    <h1>Return Books</h1>
+    <a href="user_home" style="float: right;"><button>Return</button></a>
+    <form method="POST">
+        <table border="1">
+            <tr>
+                <th>Book ISBN</th>
+                <th>Rent Date</th>
+                <th>Return Date</th>
+                <th>Action</th>
+            </tr>
+            {% for rent in user_rents %}
+                <tr>
+                    <td>{{ rent.book_ISBN }}</td>
+                    <td>{{ rent.rent_date.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ rent.return_date.strftime('%Y-%m-%d') }}</td>
+                    <td>
+                        <button type="submit" name="rent_id" value="{{ rent._id }}">Return Book</button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </form>
+</body>
+</html>

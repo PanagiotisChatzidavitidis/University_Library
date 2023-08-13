@@ -5,17 +5,19 @@
 </head>
 <body>
     <h1>User Rents</h1>
-    <table>
+    <table border="1">
         <tr>
             <th>ISBN</th>
             <th>Rent Date</th>
             <th>Return Date</th>
+            <th>Rent status</th>
         </tr>
         {% for rent in user_rents %}
         <tr>
-            <td><a href="{{ url_for('view_book', isbn=rent.book_ISBN) }}">{{ rent.book_ISBN }}</a></td>
+            <td><a href="{{ url_for('user_view_book', isbn=rent.book_ISBN) }}">{{ rent.book_ISBN }}</a></td>
             <td>{{ rent.rent_date.strftime('%Y-%m-%d') }}</td>
             <td>{{ rent.return_date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ rent.rent_status }}</td>
         </tr>
         {% endfor %}
     </table>

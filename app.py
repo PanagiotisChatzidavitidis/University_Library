@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "secret"
 
+
+
 # MongoDB connection settings
 MONGO_HOST = 'localhost'  # Update with your MongoDB host
 #MONGO_HOST = 'db'
@@ -113,7 +115,7 @@ def authentication():
 def sign_out():
     # Clear the session and redirect to the home page
     session.clear()
-    return render_template('/home.html')
+    return render_template('/home')
 
 
 #render user page template and make sesssion 
@@ -134,9 +136,9 @@ def admin_page():
 
 
 
-@app.route('/book_insert_route', methods=['GET', 'POST'])
+@app.route('/admin_book_insert_route', methods=['GET', 'POST'])
 def admin_page_book():
-    return render_template('./book_insert.html')
+    return render_template('./admin_book_insert.html')
 
 
 
@@ -159,7 +161,7 @@ def create_book():
         # Check if a book with the same ISBN already exists
         existing_book = collection.find_one({'ISBN': ISBN})
         if existing_book:
-            return '<h4>A book with the same ISBN already exists<a href="book_insert_route"></p><button>Try Again</button></h4>'
+            return '<h4>A book with the same ISBN already exists<a href="admin_book_insert_route"></p><button>Try Again</button></h4>'
         
         # Create a new book
         book = {
@@ -185,7 +187,7 @@ def create_book():
         return f"Error connecting to MongoDB: {str(e)}"
 
 #Display books
-@app.route('/book_display')
+@app.route('/user_book_display')
 def display_books():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -194,12 +196,12 @@ def display_books():
 
         books = collection.find({})  # Fetch all books from the collection
 
-        return render_template('./book_display.html', books=books)
+        return render_template('./user_book_display.html', books=books)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
     
-@app.route('/view_book/<isbn>')
-def view_book(isbn):
+@app.route('/user_view_book/<isbn>')
+def user_view_book(isbn):
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
@@ -207,22 +209,22 @@ def view_book(isbn):
 
         book = collection.find_one({'ISBN': isbn})  # Fetch the selected book
 
-        return render_template('./view_book.html', book=book)
+        return render_template('./user_view_book.html', book=book)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
 
 #render view books
-@app.route('/book_display', methods=['GET', 'POST'])
-def book_display():
-    return render_template('./book_display.html')
+@app.route('/user_book_display', methods=['GET', 'POST'])
+def user_book_display():
+    return render_template('./user_book_display.html')
 
 #render search page
-@app.route('/search')
+@app.route('/user_search')
 def search_form():
-    return render_template('./search.html')
+    return render_template('./user_search.html')
 #render search bar funtionality
-@app.route('/search_results', methods=['GET'])
-def search_results():
+@app.route('/user_search_results', methods=['GET'])
+def user_search_results():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
@@ -240,14 +242,14 @@ def search_results():
             ]
         })
 
-        return render_template('./search.html', books=books)
+        return render_template('./user_search.html', books=books)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
     
     
     # Display book selection
-@app.route('/book_selection')
-def book_selection():
+@app.route('/user_book_selection')
+def user_book_selection():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
@@ -255,14 +257,14 @@ def book_selection():
 
         books = collection.find({})  # Fetch all books from the collection
 
-        return render_template('./book_selection.html', books=books)
+        return render_template('./user_book_selection.html', books=books)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
 
 
 # Rent Book
-@app.route('/rent_book/<isbn>', methods=['GET'])
-def rent_book(isbn):
+@app.route('/user_rent_book/<isbn>', methods=['GET'])
+def user_rent_book(isbn):
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
@@ -272,15 +274,15 @@ def rent_book(isbn):
         if not book:
             return 'Book not found'
 
-        return render_template('./rent_book.html', book=book)
+        return render_template('./user_rent_book.html', book=book)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
 
 
 
 # Confirm Rent
-@app.route('/confirm_rent/<isbn>', methods=['POST'])
-def confirm_rent(isbn):
+@app.route('/user_confirm_rent/<isbn>', methods=['POST'])
+def user_confirm_rent(isbn):
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
@@ -314,17 +316,18 @@ def confirm_rent(isbn):
                     'book_ISBN': isbn,
                     'rent_date': rent_date,
                     'return_date': return_date,  # Store the calculated return date
-                    'contact_phone': contact_phone
+                    'contact_phone': contact_phone,
+                    'rent_status': 'holding'
                 }
 
                 rents_collection.insert_one(rental_record)
                 books_collection.update_one({'ISBN': isbn}, {'$set': {'status': 'Unavailable'}})
 
-                return render_template('rent_result.html', result_message='Book successfully rented!')
+                return render_template('user_rent_result.html', result_message='Book successfully rented!')
             else:
-                return render_template('rent_result.html', result_message='User not found')
+                return render_template('user_rent_result.html', result_message='User not found')
         else:
-            return render_template('rent_result.html', result_message='Book is not available for rent')
+            return render_template('user_rent_result.html', result_message='Book is not available for rent')
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
 
@@ -348,8 +351,8 @@ def user_rents():
     
 
 # Delete User Account
-@app.route('/delete_account', methods=['GET', 'POST'])
-def delete_account():
+@app.route('/user_delete_account', methods=['GET', 'POST'])
+def user_delete_account():
     if "email" in session:
         if request.method == 'POST':
             try:
@@ -365,19 +368,19 @@ def delete_account():
                 if result.deleted_count > 0:
                     # Clear session and redirect to the home page after successful deletion
                     session.clear()
-                    return render_template('delete_account.html', message='Your account has been deleted.')
+                    return render_template('user_delete_account.html', message='Your account has been deleted.')
                 else:
-                    return render_template('delete_account.html', message='Failed to delete your account.')
+                    return render_template('user_delete_account.html', message='Failed to delete your account.')
             except Exception as e:
                 return f"Error connecting to MongoDB: {str(e)}"
         else:
-            return render_template('delete_account_confirmation.html')
+            return render_template('user_delete_account_confirmation.html')
     else:
         return "User not authenticated."
 
 
-@app.route('/delete_book', methods=['GET', 'POST'])
-def delete_book():
+@app.route('/admin_admin_delete_book', methods=['GET', 'POST'])
+def admin_delete_book():
     if request.method == 'POST':
         isbn = request.form.get('isbn')
 
@@ -388,15 +391,15 @@ def delete_book():
 
             book = collection.find_one({'ISBN': isbn})
             if not book:
-                return 'Book not found</p><a href="delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
+                return 'Book not found</p><a href="admin_delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
 
             if book['status'] == 'Unavailable':
-                return 'Book has not been returned yet. Try again later.</p><a href="delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
+                return 'Book has not been returned yet. Try again later.</p><a href="admin_delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
 
             # Delete the book from the collection
             result = collection.delete_one({'ISBN': isbn})
             if result.deleted_count > 0:
-                return 'Book deleted successfully</p><a href="delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
+                return 'Book deleted successfully</p><a href="admin_delete_book"><button>Delete another book</button><a href="admin_home"><button>Return</button>'
             else:
                 return 'Failed to delete book'
         except Exception as e:
@@ -410,14 +413,14 @@ def delete_book():
             # Fetch available books from the collection
             available_books = collection.find({'status': 'Available'})
 
-            return render_template('delete_book.html', available_books=available_books)
+            return render_template('admin_delete_book.html', available_books=available_books)
         except Exception as e:
             return f"Error connecting to MongoDB: {str(e)}"
 
 
 # Update Due Date with Dropdown
-@app.route('/update_due_date', methods=['GET', 'POST'])
-def update_due_date():
+@app.route('/admin_update_due_date', methods=['GET', 'POST'])
+def admin_update_due_date():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
         db = client[MONGO_DB]
@@ -436,11 +439,11 @@ def update_due_date():
             # Update the due_date of the book
             result = collection.update_one({'ISBN': isbn}, {'$set': {'due_date': new_due_date}})
             if result.modified_count > 0:
-                return 'Rent days updated successfully</p><a href="update_due_date"><button>Update Another Book</button><a href="admin_home"><button>Return</button>'
+                return 'Rent days updated successfully</p><a href="admin_update_due_date"><button>Update Another Book</button><a href="admin_home"><button>Return</button>'
             else:
-                return 'Failed to update rent days</p><a href="update_due_date"><button>Update Another Book</button><a href="admin_home"><button>Return</button>'
+                return 'Failed to update rent days</p><a href="admin_update_due_date"><button>Update Another Book</button><a href="admin_home"><button>Return</button>'
 
-        return render_template('update_due_date.html', available_books=available_books)
+        return render_template('admin_update_due_date.html', available_books=available_books)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
 
@@ -487,3 +490,45 @@ def admin_display_books():
         return render_template('admin_display_books.html', books=book_data)
     except Exception as e:
         return f"Error connecting to MongoDB: {str(e)}"
+
+#return book 
+@app.route('/user_return_books', methods=['GET', 'POST'])
+def user_return_books():
+    if "email" in session:
+        user_email = session["email"]
+        try:
+            client = MongoClient(MONGO_HOST, MONGO_PORT)
+            db = client[MONGO_DB]
+            rents_collection = db['rents']
+            books_collection = db['books']
+
+            # Fetch rents with rent_status 'holding' for the logged-in user
+            user_rents = rents_collection.find({'user_email': user_email, 'rent_status': 'holding'})
+
+            if request.method == 'POST':
+                rent_id = request.form.get('rent_id')
+
+                # Update the rent_status to 'returned' in rents collection
+                result = rents_collection.update_one({'_id': ObjectId(rent_id)}, {'$set': {'rent_status': 'returned'}})
+
+                if result.modified_count > 0:
+                    # Get the book ISBN from the rent
+                    rent = rents_collection.find_one({'_id': ObjectId(rent_id)})
+                    if rent:
+                        book_isbn = rent['book_ISBN']
+
+                        # Update the book status to 'Available' in books collection
+                        books_collection.update_one({'ISBN': book_isbn}, {'$set': {'status': 'Available'}})
+                        return 'Book returned successfully</p><a href="user_return_books"><button>Return another book</button><a href="user_home"><button>Return home</button>'
+                    else:
+                        return 'Failed to find book information'
+                else:
+                    return 'Failed to return book'
+
+            return render_template('user_return_books.html', user_rents=user_rents)
+        except Exception as e:
+            return f"Error connecting to MongoDB: {str(e)}"
+    else:
+        return "User not authenticated."
+
+

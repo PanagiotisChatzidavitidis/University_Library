@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create new Book</title>
+</head>
+<body>
+    <a href="admin_home" style="float: right;"><button>Return</button></a>
+    <h1>Create new Book</h1>
+    <form action="/insert_book" method="POST">
+        <p>
+            <label for="title">Book Title:</label>
+            <input type="text" id="title" name="title" required><br><br>
+        </p>
+
+        <p>
+            <label for="author">Author:</label>
+            <input type="text" id="author" name="author" required><br><br>
+        </p>
+
+        <p>
+            <label for="realease_date">Release Date:</label>
+            <input type="date" id="release_date" name="release_date" required><br><br>
+        </p>
+        
+        
+        <p>
+            <label for="ISBN">ISBN:</label>
+            <input type="number" id="ISBN" name="ISBN" required><br><br>
+        </p>
+        
+        <p>
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" required><br><br>
+        </p>
+        
+        <p>
+            <label for="num_pages">Number of Pages:</label>
+            <input type="number" id="num_pages" name="num_pages" required><br><br>
+        </p>
+        
+        <p>
+            <label for="due_date">Number of Days:</label>
+            <input type="number" id="due_date" name="due_date" required><br><br>
+        </p>
+        
+        <input type="submit" value="Create Book">
+    </form>
+</body>
+</html>
