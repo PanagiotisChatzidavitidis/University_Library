@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, make_response, session
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
+from functools import wraps
 
 
 app = Flask(__name__)
@@ -16,6 +17,7 @@ MONGO_HOST = 'localhost'  # Update with your MongoDB host
 MONGO_PORT = 27017  # Update with your MongoDB port
 MONGO_DB = 'UnipiLibrary'  # Update with your MongoDB database name
 
+access = "guest"  # Initialize the access value
 
 @app.route('/', methods=['GET', "POST"])
 def hello():
@@ -85,6 +87,7 @@ def login_form():
     
 @app.route('/sign_in2', methods=['GET','POST'])
 def authentication():
+    global access
     #MongoDB Connection
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -99,6 +102,7 @@ def authentication():
     exists = collection.find_one({'email':email,'password': password})
     if exists:  
         trait = exists.get('trait', 'default_trait_value')
+        access=trait
         session["exists"] = True
         session["email"] = email  # Store the email in the session
         if trait == "User":
@@ -112,12 +116,38 @@ def authentication():
 @app.route('/sign_out', methods=['GET'])
 def sign_out():
     # Clear the session and redirect to the home page
+    global access
+    access = "guest"
     session.clear()
     return render_template('./home.html')
 
 
-#render user page template and make sesssion 
-@app.route('/user_home', methods=['GET', 'POST'])
+# Define user traits and their corresponding authorized routes
+USER_TRAITS_ROUTES = {
+    "User": ["user_home", "user_book_display", "user_search", "user_view_book","user_return_books","user_book_selection","user_rents","user_delete_account"],
+    "Admin": ["admin_home", "admin_book_insert_route", "admin_delete_book", "admin_update_due_date","insert_book","admin_display_books"],
+}
+
+
+
+# Middleware function to check access
+def check_access(route):
+    def decorator(view_func):
+        @wraps(view_func)
+        def wrapper(*args, **kwargs):
+            if access in USER_TRAITS_ROUTES:
+                if route in USER_TRAITS_ROUTES[access]:
+                    return view_func(*args, **kwargs)
+                else:
+                    return render_template('unauthorized_access.html', access=access)
+            else:
+                return render_template('unauthorized_access.html', access=access)
+        return wrapper
+    return decorator
+
+# Apply the middleware to routes
+@app.route('/user_home')
+@check_access("user_home")
 def user_page():
     if "email" in session:
         user_email = session["email"]
@@ -125,22 +155,21 @@ def user_page():
     else:
         return "User not authenticated."
 
-
-
-#render admin page template
-@app.route('/admin_home', methods=['GET', 'POST'])
+@app.route('/admin_home')
+@check_access("admin_home")
 def admin_page():
     return render_template('./admin_home.html')
 
 
-
 @app.route('/admin_book_insert_route', methods=['GET', 'POST'])
+@check_access("admin_book_insert_route")
 def admin_page_book():
     return render_template('./admin_book_insert.html')
 
 
 
 @app.route('/insert_book', methods=['POST'])
+@check_access("insert_book")
 def create_book():
     # Get user inputs
     title = request.form.get('title')
@@ -186,6 +215,8 @@ def create_book():
 
 #Display books
 @app.route('/user_book_display')
+@check_access("user_book_display")
+
 def display_books():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -213,15 +244,18 @@ def user_view_book(isbn):
 
 #render view books
 @app.route('/user_book_display', methods=['GET', 'POST'])
+@check_access("user_book_display")
 def user_book_display():
     return render_template('./user_book_display.html')
 
 #render search page
 @app.route('/user_search')
+@check_access("user_search")
 def search_form():
     return render_template('./user_search.html')
 #render search bar funtionality
 @app.route('/user_search_results', methods=['GET'])
+
 def user_search_results():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -247,6 +281,7 @@ def user_search_results():
     
     # Display book selection
 @app.route('/user_book_selection')
+@check_access("user_book_selection")
 def user_book_selection():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -334,6 +369,7 @@ def user_confirm_rent(isbn):
 
 # Display User Rents
 @app.route('/user_rents')
+@check_access("user_rents")
 def user_rents():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -350,6 +386,7 @@ def user_rents():
 
 # Delete User Account
 @app.route('/user_delete_account', methods=['GET', 'POST'])
+@check_access("user_delete_account")
 def user_delete_account():
     if "email" in session:
         if request.method == 'POST':
@@ -377,7 +414,8 @@ def user_delete_account():
         return "User not authenticated."
 
 
-@app.route('/admin_admin_delete_book', methods=['GET', 'POST'])
+@app.route('/admin_delete_book', methods=['GET', 'POST'])
+@check_access("admin_delete_book")
 def admin_delete_book():
     if request.method == 'POST':
         isbn = request.form.get('isbn')
@@ -418,6 +456,7 @@ def admin_delete_book():
 
 # Update Due Date with Dropdown
 @app.route('/admin_update_due_date', methods=['GET', 'POST'])
+@check_access("admin_update_due_date")
 def admin_update_due_date():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -447,6 +486,7 @@ def admin_update_due_date():
 
 #display books for admin
 @app.route('/admin_display_books')
+@check_access("admin_display_books")
 def admin_display_books():
     try:
         client = MongoClient(MONGO_HOST, MONGO_PORT)
@@ -491,6 +531,7 @@ def admin_display_books():
 
 #return book 
 @app.route('/user_return_books', methods=['GET', 'POST'])
+@check_access("user_return_books")
 def user_return_books():
     if "email" in session:
         user_email = session["email"]
@@ -528,5 +569,4 @@ def user_return_books():
             return f"Error connecting to MongoDB: {str(e)}"
     else:
         return "User not authenticated."
-
 

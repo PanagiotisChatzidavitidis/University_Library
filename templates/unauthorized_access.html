@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unauthorized Access</title>
+</head>
+<body>
+    {% if access == 'User' %}
+        <h3>You have no right to access this page as a regular user!</h3>
+        <a href="user_home"><button>Return to User Home</button></a>
+    {% elif access == 'Admin' %}
+        <h3>You have no right to access this page as an admin!</h3>
+        <a href="admin_home"><button>Return to Admin Home</button></a>
+    {% else %}
+        <h3>You have no right to access this page as a guest!</h3>
+        <a href="home"><button>Return to Home</button></a>
+    {% endif %}
+</body>
+</html>
