@@ -58,7 +58,7 @@ def registerpage():
         # Check if a user with the same email already exists
         existing_user = collection.find_one({'email': email})
         if existing_user:
-            return 'A user with the same email already exists.</p><a href="sign_up"><button>Try Again</button><a href="sign_in"><button>sign-in</button></h4>'
+            return 'A user with the same email already exists.</p><a href="sign_up"><button>Try Again</button><a href="sign_in"><button>Sign-in</button></h4>'
         
         # User Creation
         user = {
@@ -106,9 +106,9 @@ def authentication():
         session["exists"] = True
         session["email"] = email  # Store the email in the session
         if trait == "User":
-            return '<h4>Successful Authentication! You are an User</p><a href="user_home"><button>Continue</button></h4>'
+            return '<h4>Successful Authentication! You are a User</p><a href="user_home"><button>Continue</button></h4>'
         if trait == "Admin":
-            return '<h4>Successful Authentication! You are an Admin</p><a href="admin_home"><button>Continue</button></h4>'
+            return '<h4>Successful Authentication! You are a Admin</p><a href="admin_home"><button>Continue</button></h4>'
     else:
             return '<h4>Authentication Failed!</p></p><a href="sign_in"><button>Try Again</button><a href="home"><button>Return</button></h4>'
         
