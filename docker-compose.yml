@@ -1,0 +1,14 @@
+services:
+  flask_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000  # Adjust the port number if needed
+  db:
+    image: mongo
+    volumes:
+      - mongodb_data:/data/UnipiLibrary
+
+volumes:
+  mongodb_data:
