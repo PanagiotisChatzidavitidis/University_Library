@@ -12,10 +12,10 @@ app = Flask(__name__)
 app.secret_key = "secret"
 
 # MongoDB connection settings
-MONGO_HOST = 'localhost'  # Update with your MongoDB host
-#MONGO_HOST = 'db'
-MONGO_PORT = 27017  # Update with your MongoDB port
-MONGO_DB = 'UnipiLibrary'  # Update with your MongoDB database name
+#MONGO_HOST = 'localhost'  # MongoDB host
+MONGO_HOST = 'db'
+MONGO_PORT = 27017  #MongoDB port
+MONGO_DB = 'UnipiLibrary'  #MongoDB database name
 
 access = "guest"  # Initialize the access value
 
@@ -255,7 +255,7 @@ def user_book_display():
 @check_access("user_search")
 def search_form():
     return render_template('./user_search.html')
-#render search bar funtionality
+#search bar funtionality
 @app.route('/user_search_results', methods=['GET'])
 
 def user_search_results():

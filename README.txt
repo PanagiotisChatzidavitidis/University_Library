@@ -1,6 +1,2 @@
-Στο πρωτο Cmd:
-cd "C:\Program Files\MongoDB\Server\6.0\bin"
-mongod --dbpath "C:\Users\30694\Desktop\YpoxreotikiErgasiaSept23_E19191_Chatzidavitidis_Panagiotis\db"
-Στο 2ρο Cmd:
-set FLASK_APP=app
-flask run
+1) Για το σετάρισμα του docker: Στο CMD κάνουμε cd στον φάκελο της εργασίας και γράφουμε την ενολή 'docker-compose up'.
+2) Τα credentials του Διαχειριστή είναι: [email:admin@gmail.com και password:admin]
